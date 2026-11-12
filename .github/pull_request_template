@@ -1,0 +1,28 @@
+## What changed (plain language)
+
+## Why (link to purpose in docs/PROJECT-SCOPE.md)
+
+## How we know it works
+| Check from scope | Evidence (test, comparison, screenshot) | Pass? |
+|---|---|---|
+
+## Not tested / known limitations
+
+## AI audit trail
+- Tool(s) used:
+- Session logs: `docs/ai-log/...`
+- AI review run? Findings addressed?
+
+## Builder confirmation
+- [ ] I can explain every change in my own words
+- [ ] Only approved sample data was used
+- [ ] No passwords, keys, or internal paths in the code
+- [ ] Session log is up to date
+
+---
+### For the approver
+Approve this pull request with **Review changes > Approve**, and include this statement in your review comment:
+
+> I have reviewed this change, I understand what it does, and I accept responsibility for approving it.
+
+The `human-approval` check stays red until an approval containing this statement is submitted by someone other than the author.

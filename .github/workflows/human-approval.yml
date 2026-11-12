@@ -1,0 +1,38 @@
+# Passes only when someone OTHER than the PR author has submitted an approving
+# review that contains the responsibility statement.
+name: human-approval
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  human-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for responsibility statement in an approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          phrase="i accept responsibility for approving it"
+          gh api "repos/$REPO/pulls/$PR/reviews" --paginate > reviews.json
+          match=$(jq -r --arg a "$AUTHOR" --arg sha "$HEAD_SHA" --arg p "$phrase" '
+            [ .[] | select(.state=="APPROVED")
+                  | select(.user.login != $a)
+                  | select(.commit_id == $sha)
+                  | select((.body // "" | ascii_downcase) | contains($p))
+                  | .user.login ] | unique | join(", ")' reviews.json)
+          if [ -n "$match" ]; then
+            echo "Approved with responsibility statement by: $match"
+            echo "### Human approval recorded: $match" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::Waiting for an approval on the latest commit, from someone other than $AUTHOR, that includes: 'I have reviewed this change, I understand what it does, and I accept responsibility for approving it.'"
+            exit 1
+          fi
